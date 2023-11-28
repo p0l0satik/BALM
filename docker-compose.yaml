@@ -1,0 +1,30 @@
+version: "3.4"
+
+services:
+  ros-rviz:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    image: rviz_container:noetic
+    container_name: balm11
+    network_mode: "host"
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    privileged: true
+    runtime: nvidia
+    device: /dev/snd
+    environment:
+      - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/tmp/.docker.xauth
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - /usr/local/nvidia/bin:${PATH}
+      - DISPLAY=$DISPLAY
+      # - XDG_RUNTIME_DIR= /run/user/1000
+      - ROS_MASTER_URI=http://localhost:11311
+      - PULSE_SERVER=unix:${XDG_RUNTIME_DIR}/pulse/native
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native:Z
+      - $QR_READER/qr_reader_ros_ws/src/config.yaml:/root/.ignition/fuel/config.yaml

@@ -2,9 +2,9 @@
 	<arg name="rviz" default="true" />
 
 	<param name="tseed" type="int" value="2" />
-	<node pkg="balm2" type="PA_test" name="PA_test" output="screen"/>
+	<!-- <node pkg="balm2" type="PA_test" name="PA_test" output="screen"/> -->
 	<!-- <node pkg="balm2" type="BAREG_test" name="BAREG_test" output="screen"/> -->
-	<!-- <node pkg="balm2" type="BALM1_test" name="BALM1_test" output="screen"/> -->
+	<node pkg="balm2" type="BALM1_test" name="BALM1_test" output="screen"/>
 	<!-- <node pkg="balm2" type="EF_test" name="EF_test" output="screen"/> -->
 
 	<group if="$(arg rviz)">

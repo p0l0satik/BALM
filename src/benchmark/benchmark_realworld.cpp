@@ -211,7 +211,7 @@ int main(int argc, char **argv)
       printf("Initial error too large.\n");
       printf("Please loose plane determination criteria for more planes.\n");
       printf("The optimization is terminated.\n");
-      exit(0);
+      // exit(0);
     }
 
     BALM2 opt_lsv;
