@@ -9,6 +9,10 @@
 #include <tf/transform_broadcaster.h>
 #include "bavoxel.hpp"
 
+include <iostream>
+#include <fstream>
+#include <iomanip>
+
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
 #include <malloc.h>
@@ -26,7 +30,7 @@ void pub_pl_func(T &pl, ros::Publisher &pub)
   pub.publish(output);
 }
 
-ros::Publisher pub_path, pub_test, pub_show, pub_cute;
+ros::Publisher pub_path, pub_test, pub_show, pub_cute, pub_pose;
 
 int read_pose(vector<double> &tims, PLM(3) &rots, PLV(3) &poss, string prename)
 {
@@ -105,7 +109,7 @@ void read_file(vector<IMUST> &x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl
 
 }
 
-void data_show(vector<IMUST> x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl_fulls)
+void data_show(vector<IMUST> x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl_fulls, string &output_filename)
 {
   IMUST es0 = x_buf[0];
   for(uint i=0; i<x_buf.size(); i++)
@@ -113,6 +117,36 @@ void data_show(vector<IMUST> x_buf, vector<pcl::PointCloud<PointType>::Ptr> &pl_
     x_buf[i].p = es0.R.transpose() * (x_buf[i].p - es0.p);
     x_buf[i].R = es0.R.transpose() * x_buf[i].R;
   }
+  vector<IMUST> xBuf2 = x_buf;
+  geometry_msgs::PoseArray parray;
+  parray.header.frame_id = "camera_init";
+  std::ofstream myfile;
+  myfile.open(output_filename);
+  for(int i=0; i<xBuf2.size(); i++)
+  {
+    Eigen::Quaterniond q_curr(xBuf2[i].R);
+    Eigen::Vector3d t_curr(xBuf2[i].p);
+    geometry_msgs::Pose apose;
+    apose.orientation.w = q_curr.w();
+    apose.orientation.x = q_curr.x();
+    apose.orientation.y = q_curr.y();
+    apose.orientation.z = q_curr.z();
+    apose.position.x = t_curr.x();
+    apose.position.y = t_curr.y();
+    apose.position.z = t_curr.z();
+    parray.poses.push_back(apose);
+
+    myfile << std::setprecision(std::numeric_limits<double>::digits10 + 1)
+    << apose.position.x << ","
+    << apose.position.y << ","
+    << apose.position.z << ","
+    << apose.orientation.x << ","
+    << apose.orientation.y << ","
+    << apose.orientation.z << ","
+    << apose.orientation.w << ",\n";
+  }
+  pub_pose.publish(parray);
+  myfile.close();
 
   pcl::PointCloud<PointType> pl_send, pl_path;
   int winsize = x_buf.size();
@@ -149,6 +183,7 @@ int main(int argc, char **argv)
   pub_path = n.advertise<sensor_msgs::PointCloud2>("/map_path", 100);
   pub_show = n.advertise<sensor_msgs::PointCloud2>("/map_show", 100);
   pub_cute = n.advertise<sensor_msgs::PointCloud2>("/map_cute", 100);
+  pub_pose = n.advertise<geometry_msgs::PoseArray>("/poseArray", 10);
 
   string prename, ofname;
   vector<IMUST> x_buf;
@@ -157,6 +192,7 @@ int main(int argc, char **argv)
   n.param<double>("voxel_size", voxel_size, 1);
   string file_path;
   n.param<string>("file_path", file_path, "");
+  string output_pre_path = file_path + "/output";
 
   read_file(x_buf, pl_fulls, file_path);
 
@@ -170,10 +206,9 @@ int main(int argc, char **argv)
   win_size = x_buf.size();
   printf("The size of poses: %d\n", win_size);
 
-  data_show(x_buf, pl_fulls);
+  string output_path = output_pre_path + "/pose_start.csv";
+  data_show(x_buf, pl_fulls, output_path);
   printf("Check the point cloud with the initial poses.\n");
-  printf("If no problem, input '1' to continue or '0' to exit...\n");
-  int a; cin >> a; if(a==0) exit(0);
 
   pcl::PointCloud<PointType> pl_full, pl_surf, pl_path, pl_send;
   for(int iterCount=0; iterCount<1; iterCount++)
@@ -229,7 +264,8 @@ int main(int argc, char **argv)
 
   printf("\nRefined point cloud is publishing...\n");
   malloc_trim(0);
-  data_show(x_buf, pl_fulls);
+  string output_path = output_pre_path + "/pose_result.csv";
+  data_show(x_buf, pl_fulls, output_path);
   printf("\nRefined point cloud is published.\n");
 
   ros::spin();
