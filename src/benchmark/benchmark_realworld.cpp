@@ -9,7 +9,7 @@
 #include <tf/transform_broadcaster.h>
 #include "bavoxel.hpp"
 
-include <iostream>
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 
@@ -237,8 +237,6 @@ int main(int argc, char **argv)
     pub_pl_func(pl_send, pub_cute);
     printf("\nThe planes (point association) cut by adaptive voxelization.\n");
     printf("If the planes are too few, the optimization will be degenerated and fail.\n");
-    printf("If no problem, input '1' to continue or '0' to exit...\n");
-    int a; cin >> a; if(a==0) exit(0);
     pl_send.clear(); pub_pl_func(pl_send, pub_cute);
 
     if(voxhess.plvec_voxels.size() < 3 * x_buf.size())
@@ -264,11 +262,11 @@ int main(int argc, char **argv)
 
   printf("\nRefined point cloud is publishing...\n");
   malloc_trim(0);
-  string output_path = output_pre_path + "/pose_result.csv";
+  output_path = output_pre_path + "/pose_result.csv";
   data_show(x_buf, pl_fulls, output_path);
   printf("\nRefined point cloud is published.\n");
 
-  ros::spin();
+  // ros::spin();
   return 0;
 
 }
