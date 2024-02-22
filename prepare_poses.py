@@ -15,13 +15,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--poses",
         type=str,
-        default="/home/polosatik/voxel-slam/evaluation/hilti/poses",
         help="path to the pointclouds",
     )
     parser.add_argument(
         "--save_path",
         type=str,
-        default="/home/polosatik/mnt/hilti/14_short_balm",
         help="path to the file with poses before refinement",
     )
 

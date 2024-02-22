@@ -87,8 +87,7 @@ def save_poses(poses, filename: Path):
     with open(filename, mode="w") as saved_poses:
         saved_poses_csv = csv.writer(saved_poses, lineterminator=",\n")
         for pose in poses:
-            pose_m = pose.tolist()
-            saved_poses_csv.writerows(pose_m)
+            saved_poses_csv.writerows(pose.tolist())
 
 
 if __name__ == "__main__":
@@ -96,13 +95,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset",
         type=str,
-        default="",
         help="path to the pointclouds",
     )
     parser.add_argument(
         "--save_path",
         type=str,
-        default="",
         help="path where to save poses after alignment",
     )
     parser.add_argument(

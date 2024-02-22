@@ -1,7 +1,5 @@
 FROM ros:noetic
 
-FROM ros:noetic
-
 RUN apt-get update \
     &&  apt-get install -y \
         build-essential \
